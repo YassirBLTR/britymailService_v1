@@ -1,0 +1,7 @@
+# Ignore deployment artifacts (systemd, apache configs, docs)
+deploy/
+
+# Secrets and local config
+accounts.json
+
+
