@@ -64,22 +64,6 @@ class BrityworksAccountManager:
                 "account_id": "account_1",
                 "email": "blawsompirow22@brityworks.com",
                 "display_name": "Account 1",
-                "cookies": {
-                    "SCOUTER": "x490vgmqhm4nk2",
-                    "saveLanguage": "en_US.EUC-KR",
-                    "logimage.index": "0",
-                    "BRITY_K8S": "1748696144.735.15186.853933|dbbcfaa59e333e6be4fcc8a34a9fa462",
-                    "EPV8PTSID": "-qvKp501QqM04JLus3FR2aK4VeBImF6c8Ly70l0",
-                    "saveLoginId": "blawsompirow22@brityworks.com",
-                    "EP6_UTOKEN": "4FTGYEZmNKLOHLnRNF2CBn5lv1kewXgfNMks4qO6TcKY7WC0bDWnJoe0eWWd92tCbC5kZQRGJGBZX+fYA3XwxI0YJYuUXceCsngI+5BpzPhTOk3WZIaBZJ4fdneR+aLogNMJLDDuPvcUL9kfEm3wEFrKdad7jk58097XE/uV2WBEGy0XwWa0TWvTjrECj8/4QAlBtFp2c793leonzbKb7y5IFlKVvT+1nRRGXAwvjJVVFMaM5dKAHtyaYhUedqij8RqyHY4icqqTB7HoOO9kbzDv7YjUtk5Ynq1FhcTq9fildtKSkiq0HzbGJOFdAkxaf9lnnFivjtcpeAiTsqZUglM3MnUOCusvSlGux7rFk4I=",
-                    "EP_BROWSERID": "1748696300881",
-                    "EP_LOGINID": "blawsompirow22@brityworks.com",
-                    "EPV8EMSID": "eCxmhfzvQQ2ozOBIoBbk9GJaACkcZX9uDtgOYdaL",
-                    "EPV8BBSID": "ftJp6FOkD-Lec7ZhDMRvMgGF-AVcuHQYSpG6kUhG",
-                    "EPV8APSID": "UmePUQvsbDIwOD2JBKsw4FuSzXphTmRR8yXPHjur",
-                    "EPV8PISID": "8U9D98Zu9MfCx7uTU2W3SxWyR_ww6Q71RWMF9gWp",
-                    "EPV8MLSID": "DzffUUdnbZKTomHC-ZhDmdoQCUPY8nZyYWU-9VtJ"
-                },
                 "headers": {
                     "accept": "application/json, text/plain, */*",
                     "accept-language": "en-US,en;q=0.9",
@@ -313,7 +297,6 @@ async def forward_email_to_brittymail(payload: ParsedEmailPayload):
         raise HTTPException(status_code=400, detail=f"No matching account found for sender: {sender_email}")
     
     account_email = account.get('email')
-    account_cookies = account.get('cookies', {})
     account_headers = account.get('headers', {})
     
     logger.info(f"FastAPI: Using account '{account.get('account_id')}' ({account_email}) to send email")
@@ -370,7 +353,6 @@ async def forward_email_to_brittymail(payload: ParsedEmailPayload):
         try:
             response = await client.post(
                 BRITTYMAIL_SEND_URL,
-                cookies=account_cookies,
                 headers=account_headers,
                 json=brittymail_json_data
             )
@@ -430,7 +412,6 @@ async def get_account(account_id: str):
         "email": account.get("email"),
         "display_name": account.get("display_name"),
         "is_selected": account_id in account_manager.selected_accounts,
-        "has_cookies": bool(account.get("cookies")),
         "has_headers": bool(account.get("headers"))
     }
 
@@ -438,7 +419,6 @@ class AccountCreate(BaseModel):
     account_id: str
     email: str
     display_name: str
-    cookies: dict
     headers: dict
 
 @fastapi_app.post("/accounts/")
@@ -455,7 +435,6 @@ async def create_account(account: AccountCreate):
         "account_id": account.account_id,
         "email": account.email,
         "display_name": account.display_name,
-        "cookies": account.cookies,
         "headers": account.headers
     }
     account_manager.accounts[account.account_id] = new_account
@@ -482,7 +461,6 @@ async def update_account(account_id: str, account: AccountCreate):
         "account_id": account.account_id,
         "email": account.email,
         "display_name": account.display_name,
-        "cookies": account.cookies,
         "headers": account.headers
     }
     

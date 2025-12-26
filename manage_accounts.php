@@ -34,15 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'account_id' => trim($_POST['account_id']),
             'email' => trim($_POST['email']),
             'display_name' => trim($_POST['display_name']),
-            'cookies' => json_decode($_POST['cookies'], true),
             'headers' => json_decode($_POST['headers'], true)
         ];
         
         // Validate
         if (empty($new_account['account_id']) || empty($new_account['email'])) {
             $error = 'Account ID and Email are required!';
-        } elseif ($new_account['cookies'] === null || $new_account['headers'] === null) {
-            $error = 'Invalid JSON format for cookies or headers!';
+        } elseif ($new_account['headers'] === null) {
+            $error = 'Invalid JSON format for headers!';
         } else {
             // Check for duplicate account_id
             $exists = false;
@@ -73,15 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'account_id' => trim($_POST['account_id']),
             'email' => trim($_POST['email']),
             'display_name' => trim($_POST['display_name']),
-            'cookies' => json_decode($_POST['cookies'], true),
             'headers' => json_decode($_POST['headers'], true)
         ];
         
         // Validate
         if (empty($updated_account['account_id']) || empty($updated_account['email'])) {
             $error = 'Account ID and Email are required!';
-        } elseif ($updated_account['cookies'] === null || $updated_account['headers'] === null) {
-            $error = 'Invalid JSON format for cookies or headers!';
+        } elseif ($updated_account['headers'] === null) {
+            $error = 'Invalid JSON format for headers!';
         } else {
             $found = false;
             foreach ($accounts as $key => $acc) {
@@ -424,12 +422,6 @@ if (isset($_GET['edit'])) {
                 </div>
                 
                 <div class="form-group">
-                    <label for="cookies">Cookies (JSON) *</label>
-                    <textarea id="cookies" name="cookies" required placeholder='{"SCOUTER": "value", "saveLanguage": "en_US"}'><?php echo $edit_account ? json_encode($edit_account['cookies'], JSON_PRETTY_PRINT) : ''; ?></textarea>
-                    <small>Paste cookies in JSON format</small>
-                </div>
-                
-                <div class="form-group">
                     <label for="headers">Headers (JSON) *</label>
                     <textarea id="headers" name="headers" required placeholder='{"accept": "application/json", "content-type": "application/json"}'><?php echo $edit_account ? json_encode($edit_account['headers'], JSON_PRETTY_PRINT) : ''; ?></textarea>
                     <small>Paste headers in JSON format</small>
@@ -465,7 +457,6 @@ if (isset($_GET['edit'])) {
                             <h3>🔑 <?php echo htmlspecialchars($account['display_name'] ?: $account['account_id']); ?></h3>
                             <p><strong>Account ID:</strong> <?php echo htmlspecialchars($account['account_id']); ?></p>
                             <p><strong>Email:</strong> <?php echo htmlspecialchars($account['email']); ?></p>
-                            <p><strong>Cookies:</strong> <?php echo count($account['cookies']); ?> items</p>
                             <p><strong>Headers:</strong> <?php echo count($account['headers']); ?> items</p>
                             
                             <div class="actions">
@@ -485,15 +476,6 @@ if (isset($_GET['edit'])) {
     
     <script>
         // Auto-format JSON on blur
-        document.getElementById('cookies').addEventListener('blur', function() {
-            try {
-                const parsed = JSON.parse(this.value);
-                this.value = JSON.stringify(parsed, null, 2);
-                this.style.borderColor = '#ddd';
-            } catch (e) {
-                this.style.borderColor = '#dc3545';
-            }
-        });
         
         document.getElementById('headers').addEventListener('blur', function() {
             try {
