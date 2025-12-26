@@ -4,10 +4,49 @@
  * Web interface for managing email accounts credentials
  */
 
+// Start session
+session_start();
+
 // Configuration
+$admin_password = 'LORDLAVA12'; // Change this password for production
 $accounts_file = __DIR__ . '/accounts.json';
 $message = '';
 $error = '';
+
+// Generate CSRF token
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Handle login
+if (isset($_POST['login'])) {
+    if ($_POST['password'] === $admin_password) {
+        $_SESSION['authenticated'] = true;
+        $_SESSION['login_time'] = time();
+        $message = 'Login successful!';
+    } else {
+        $error = 'Invalid password!';
+        $_SESSION['authenticated'] = false;
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: manage_accounts.php');
+    exit;
+}
+
+// Check if authenticated (session expires after 1 hour)
+$is_authenticated = false;
+if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
+    if (time() - $_SESSION['login_time'] < 3600) { // 1 hour timeout
+        $is_authenticated = true;
+    } else {
+        session_destroy();
+        $error = 'Session expired. Please login again.';
+    }
+}
 
 // Helper function to read accounts
 function readAccounts($file) {
@@ -389,6 +428,29 @@ if (isset($_GET['edit'])) {
             <div class="alert alert-error">❌ <?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
         
+        <?php if (!$is_authenticated): ?>
+        <!-- Login Form -->
+        <div class="card">
+            <h2>🔐 Login Required</h2>
+            <p style="margin-bottom: 20px; color: #666;">Please enter the admin password to access the account management interface.</p>
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="password">Admin Password *</label>
+                    <input type="password" id="password" name="password" placeholder="Enter admin password" required autofocus>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" name="login" class="btn btn-primary">🔓 Login</button>
+                </div>
+            </form>
+        </div>
+        <?php else: ?>
+        
+        <!-- Logout Button -->
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a href="?logout" class="btn btn-danger" onclick="return confirm('Are you sure you want to logout?')">🚪 Logout</a>
+        </div>
+        
         <!-- Add/Edit Account Form -->
         <div class="card">
             <h2><?php echo $edit_account ? '✏️ Edit Account' : '➕ Add New Account'; ?></h2>
@@ -472,24 +534,30 @@ if (isset($_GET['edit'])) {
                 </div>
             <?php endif; ?>
         </div>
+        
+        <?php endif; // End authentication check ?>
     </div>
     
     <script>
-        // Auto-format JSON on blur
-        
-        document.getElementById('headers').addEventListener('blur', function() {
-            try {
-                const parsed = JSON.parse(this.value);
-                this.value = JSON.stringify(parsed, null, 2);
-                this.style.borderColor = '#ddd';
-            } catch (e) {
-                this.style.borderColor = '#dc3545';
-            }
-        });
+        // Auto-format JSON on blur (only if authenticated)
+        <?php if ($is_authenticated): ?>
+        const headersField = document.getElementById('headers');
+        if (headersField) {
+            headersField.addEventListener('blur', function() {
+                try {
+                    const parsed = JSON.parse(this.value);
+                    this.value = JSON.stringify(parsed, null, 2);
+                    this.style.borderColor = '#ddd';
+                } catch (e) {
+                    this.style.borderColor = '#dc3545';
+                }
+            });
+        }
         
         // Scroll to form when editing
         <?php if ($edit_account): ?>
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        <?php endif; ?>
         <?php endif; ?>
     </script>
 </body>
