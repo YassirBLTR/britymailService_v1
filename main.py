@@ -714,7 +714,12 @@ if __name__ == '__main__':
             logger.warning(f"Account selection skipped: {e}")
 
         # Run the main asynchronous function
-        asyncio.run(main())
+        # Python 3.6 compatible: use get_event_loop() instead of asyncio.run()
+        loop = asyncio.get_event_loop()
+        try:
+            loop.run_until_complete(main())
+        finally:
+            loop.close()
     except KeyboardInterrupt:
         logger.info("Application stopped by user (Ctrl+C).")
     except Exception as e:
