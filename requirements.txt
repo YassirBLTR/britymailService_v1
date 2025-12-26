@@ -12,7 +12,7 @@ httpx==0.22.0 # Last version supporting Python 3.6
 pydantic==1.9.2  # Pydantic v1.x supports Python 3.6 (v2.x requires 3.7+)
 
 # SMTP Server
-aiosmtpd==1.4.4.post2  # Compatible with Python 3.6
+aiosmtpd==1.4.2  # Compatible with Python 3.6
 
 # Optional: Production Server (uncomment if needed)
 # gunicorn==20.1.0  # Compatible with Python 3.6
