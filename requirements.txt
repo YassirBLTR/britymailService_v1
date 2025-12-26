@@ -1,17 +1,18 @@
 # Brityworks Email Forwarder - Python Dependencies
+# Python 3.6 Compatible Versions
 
 # Web Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi==0.68.2  # Last version supporting Python 3.6
+uvicorn[standard]==0.15.0  # Compatible with Python 3.6
 
 # HTTP Client
-httpx==0.25.1
+httpx==0.23.3  # Last version supporting Python 3.6
 
 # Data Validation
-pydantic==2.5.0
+pydantic==1.10.13  # Pydantic v1.x supports Python 3.6 (v2.x requires 3.7+)
 
 # SMTP Server
-aiosmtpd==1.4.4.post2
+aiosmtpd==1.4.4.post2  # Compatible with Python 3.6
 
 # Optional: Production Server (uncomment if needed)
-# gunicorn==21.2.0
+# gunicorn==20.1.0  # Compatible with Python 3.6
